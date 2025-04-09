@@ -8,6 +8,7 @@ from app.schemas.post import PostCreate, PostUpdate, PostResponse, PostModeratio
 from app.api.deps import get_current_user
 from app.models.user import Role, User
 from app.api.deps import get_db
+from app.db.repositories.post_repo import search_posts
 
 router = APIRouter()
 
@@ -77,3 +78,15 @@ def moderate_post(
     db.commit()
     db.refresh(post)
     return post
+
+@router.get("/search/post", response_model=List[PostResponse])
+def search(
+    query: str,
+    approval_status: Optional[str] = Query(None, enum=["pending", "approved", "rejected"]),
+    post_status: Optional[str] = Query(None, enum=["draft", "published", "archived"]),
+    tags: Optional[str] = None
+):
+    # Выполняем поиск через Elasticsearch
+    results = search_posts(query, approval_status, post_status, tags)
+
+    return results
