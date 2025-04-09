@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from app.crud import create_comment, get_comment, get_comments_for_post, update_comment, delete_comment
-from app.schemas import CommentCreate, CommentUpdate
+from app.db.repositories.comments_repo import create_comment, get_comment, get_comments_for_post, update_comment, delete_comment
+from app.schemas.comments import CommentCreate, CommentUpdate
 
 class CommentService:
     def __init__(self, db: Session):
