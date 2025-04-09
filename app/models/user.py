@@ -1,6 +1,12 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Enum
 from app.db.base import Base
 from sqlalchemy.orm import relationship
+import enum
+
+class Role(enum.Enum):
+    ADMIN = "ADMIN"
+    USER = "USER"
+    MODERATOR = "MODERATOR"
 
 class User(Base):
     __tablename__ = "users"
@@ -9,6 +15,6 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
+    role = Column(Enum(Role), default=Role.USER)
 
     posts = relationship("Post", back_populates="owner", cascade="all, delete-orphan")
-

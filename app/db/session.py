@@ -8,7 +8,7 @@ import os
 load_dotenv(encoding='utf-8')  # or try 'latin-1' if utf-8 doesn't work
 
 # Получаем строку подключения из переменных окружения
-DATABASE_URL ="postgresql://postgres:123123@localhost:5433/blogbd"
+DATABASE_URL ="postgresql://postgres:123123@localhost:5433/DB_BLOG"
 
 # Если переменная окружения пустая, выводим ошибку
 if not DATABASE_URL:
@@ -20,3 +20,5 @@ engine = create_engine(DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
+Base.metadata.create_all(engine)
