@@ -3,6 +3,9 @@ from sqlalchemy.orm import Session
 from app.db.session import SessionLocal
 from app.schemas.comments import CommentInDB, CommentCreate, CommentUpdate
 from app.services.comments_service import CommentService
+from app.api.deps import get_current_user
+from app.models.user import User
+
 router = APIRouter()
 
 def get_db():
@@ -17,11 +20,11 @@ def get_db():
 def create_comment(
     comment: CommentCreate,
     post_id: int,
-    owner_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     comment_service = CommentService(db)
-    db_comment = comment_service.create(comment, post_id, owner_id)
+    db_comment = comment_service.create(comment, post_id, current_user.id)
     return db_comment
 
 # Получение всех комментариев для поста
@@ -44,24 +47,38 @@ def get_comment(comment_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Comment not found")
     return db_comment
 
-# Обновление комментария
 @router.put("/{comment_id}", response_model=CommentInDB)
 def update_comment(
     comment_id: int,
     comment: CommentUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     comment_service = CommentService(db)
-    db_comment = comment_service.update(comment_id, comment)
+    db_comment = comment_service.get(comment_id)
     if not db_comment:
         raise HTTPException(status_code=404, detail="Comment not found")
-    return db_comment
 
-# Удаление комментария
+    if db_comment.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="You do not have permission to update this comment")
+
+    updated_comment = comment_service.update(comment_id, comment)
+    return updated_comment
+
 @router.delete("/{comment_id}", response_model=CommentInDB)
-def delete_comment(comment_id: int, db: Session = Depends(get_db)):
+def delete_comment(
+    comment_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     comment_service = CommentService(db)
-    db_comment = comment_service.delete(comment_id)
+    db_comment = comment_service.get(comment_id)
     if not db_comment:
         raise HTTPException(status_code=404, detail="Comment not found")
-    return db_comment
+
+    if db_comment.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="You do not have permission to delete this comment")
+
+    deleted_comment = comment_service.delete(comment_id)
+    return deleted_comment
+
