@@ -3,16 +3,9 @@ from sqlalchemy.orm import Session
 from app.db.session import SessionLocal
 from app.db.repositories.user_repo import create_user, get_user_by_username
 from app.schemas.user import UserCreate, UserResponse
+from app.api.deps import get_db
 
 router = APIRouter()
-
-# Функция для получения базы данных
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 # Обработчик POST запроса для создания пользователя
 @router.post("/users/", response_model=UserResponse)

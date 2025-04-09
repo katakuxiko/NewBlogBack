@@ -6,15 +6,9 @@ from app.db.repositories import post_repo
 from app.schemas.post import PostCreate, PostUpdate, PostResponse
 from app.api.deps import get_current_user
 from app.models.user import User
+from app.api.deps import get_db
 
 router = APIRouter()
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 @router.post("/", response_model=PostResponse)
 def create_post(post: PostCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

@@ -3,17 +3,10 @@ from sqlalchemy.orm import Session
 from app.db.session import SessionLocal
 from app.schemas.comments import CommentInDB, CommentCreate, CommentUpdate
 from app.services.comments_service import CommentService
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, get_db
 from app.models.user import User
 
 router = APIRouter()
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 # Создание комментария
 @router.post("/", response_model=CommentInDB)

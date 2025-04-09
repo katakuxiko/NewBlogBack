@@ -4,15 +4,9 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.core.security import verify_password, create_access_token
 from app.db.repositories.user_repo import get_user_by_username
 from app.db.session import SessionLocal
+from app.api.deps import get_db
 
 router = APIRouter()
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 @router.post("/token")
 def login_for_access_token(
