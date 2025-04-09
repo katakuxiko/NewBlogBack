@@ -6,7 +6,9 @@ class PostBase(BaseModel):
     title: str
     content: str
     tags: Optional[str] = None
-    post_status: Optional[str] = "draft"  # можно также использовать Literal или Enum
+    post_status: Optional[str] = "draft"
+    image_base64: Optional[str] = None  # Для PostCreate
+
 
 class PostCreate(PostBase):
     pass
@@ -23,6 +25,8 @@ class PostResponse(PostBase):
     approved_at: Optional[datetime] = None
     approval_status: str
     post_status: str
+    image_url: Optional[str] = None
+
 
     class Config:
         from_attributes = True

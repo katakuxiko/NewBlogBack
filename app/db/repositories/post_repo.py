@@ -2,14 +2,20 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from app.models.post import Post
 from app.schemas.post import PostCreate, PostUpdate
+from app.utils.minio_uploader import upload_base64_image
 
 def create_post(db: Session, post: PostCreate, user_id: int) -> Post:
+    image_url = None
+    if post.image_base64:
+        image_url = upload_base64_image(post.image_base64)
+
     db_post = Post(
         title=post.title,
         content=post.content,
         tags=post.tags,
         post_status=post.post_status,
         owner_id=user_id,
+        image_url=image_url,
     )
     db.add(db_post)
     db.commit()
