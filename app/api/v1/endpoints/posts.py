@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
+from datetime import datetime
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from app.db.session import SessionLocal
 from app.db.repositories import post_repo
-from app.schemas.post import PostCreate, PostUpdate, PostResponse
+from app.schemas.post import PostCreate, PostUpdate, PostResponse, PostModerationUpdate
 from app.api.deps import get_current_user
-from app.models.user import User
+from app.models.user import Role, User
 from app.api.deps import get_db
 
 router = APIRouter()
@@ -15,8 +16,20 @@ def create_post(post: PostCreate, db: Session = Depends(get_db), current_user: U
     return post_repo.create_post(db, post, current_user.id)
 
 @router.get("/", response_model=List[PostResponse])
-def get_all_posts(db: Session = Depends(get_db)):
-    return post_repo.get_posts(db)
+def get_all_posts(
+    db: Session = Depends(get_db),
+    approval_status: Optional[str] = Query(None),
+    post_status: Optional[str] = Query(None),
+    owner_id: Optional[int] = Query(None),
+    title: Optional[str] = Query(None),
+):
+    return post_repo.get_posts(
+        db,
+        approval_status=approval_status,
+        post_status=post_status,
+        owner_id=owner_id,
+        title=title
+    )
 
 @router.get("/my", response_model=List[PostResponse])
 def get_my_posts(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
@@ -42,3 +55,25 @@ def delete_post(post_id: int, db: Session = Depends(get_db), current_user: User 
     if not deleted_post:
         raise HTTPException(status_code=403, detail="Not authorized to delete this post")
     return {"message": "Post deleted"}
+
+@router.patch("/moderate/{post_id}", response_model=PostResponse)
+def moderate_post(
+    post_id: int,
+    moderation: PostModerationUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    print('ROLE', current_user.username, current_user.role)
+    if current_user.role not in [Role.ADMIN, Role.MODERATOR]:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    post = post_repo.get_post_by_id(db, post_id)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    post.approval_status = moderation.approval_status
+    post.approved_at = datetime.now() if moderation.approval_status == "approved" else None
+
+    db.commit()
+    db.refresh(post)
+    return post
