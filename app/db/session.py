@@ -5,10 +5,10 @@ from dotenv import load_dotenv
 import os
 
 # Загружаем переменные из файла .env
-load_dotenv(encoding='utf-8')  # or try 'latin-1' if utf-8 doesn't work
+load_dotenv(encoding='utf-8', override=True)
 
 # Получаем строку подключения из переменных окружения
-DATABASE_URL ="postgresql://postgres:123123@localhost:5433/DB_BLOG"
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Если переменная окружения пустая, выводим ошибку
 if not DATABASE_URL:
