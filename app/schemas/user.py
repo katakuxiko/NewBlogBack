@@ -7,7 +7,6 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
-    role: str  # Добавили роли
 
 class UserResponse(BaseModel):
     id: int
