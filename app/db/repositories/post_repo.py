@@ -61,6 +61,9 @@ def create_post(db: Session, post: PostCreate, user_id: int) -> Post:
 
 def update_post(db: Session, post_id: int, post_data: PostUpdate, user_id: int) -> Optional[Post]:
     post = db.query(Post).filter(Post.id == post_id, Post.owner_id == user_id).first()
+
+    if post_data.image_base64:
+        post.image_url = upload_base64_image(post_data.image_base64)
     if not post:
         return None
 
