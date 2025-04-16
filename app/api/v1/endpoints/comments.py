@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.session import SessionLocal
-from app.schemas.comments import CommentInDB, CommentCreate, CommentUpdate
+from app.schemas.comments import CommentInDB, CommentCreate, CommentUpdate, CommentResponse
 from app.services.comments_service import CommentService
 from app.api.deps import get_current_user, get_db
 from app.models.user import User
@@ -21,7 +21,7 @@ def create_comment(
     return db_comment
 
 # Получение всех комментариев для поста
-@router.get("/posts/{post_id}/", response_model=list[CommentInDB])
+@router.get("/posts/{post_id}/", response_model=list[CommentResponse])
 def get_comments_for_post(
     post_id: int,
     skip: int = 0,

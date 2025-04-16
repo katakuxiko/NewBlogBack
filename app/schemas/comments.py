@@ -19,3 +19,12 @@ class CommentInDB(CommentBase):
 
     class Config:
         orm_mode = True
+
+class CommentResponse(CommentBase):
+    id: int
+    post_id: int
+    owner_id: int
+    created_at: datetime
+    owner_username: Optional[str] = None
+    class Config:
+        orm_mode = True

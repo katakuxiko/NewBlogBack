@@ -69,6 +69,7 @@ def update_post(db: Session, post_id: int, post_data: PostUpdate, user_id: int) 
 
     for key, value in post_data.dict(exclude_unset=True).items():
         setattr(post, key, value)
+    post.approval_status = "pending"
     db.commit()
     db.refresh(post)
 
