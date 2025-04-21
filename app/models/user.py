@@ -18,3 +18,6 @@ class User(Base):
     role = Column(Enum(Role), default=Role.USER)
     posts = relationship("Post", back_populates="owner", cascade="all, delete-orphan")
     comments = relationship("Comment", back_populates="owner")  # Строковая ссылка на Comment
+
+    profile = relationship("UserProfile", back_populates="user", uselist=False, cascade="all, delete-orphan")
+
